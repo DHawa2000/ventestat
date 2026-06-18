@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 require_once "../config/db.php";
@@ -27,21 +26,107 @@ if (isset($_POST['login'])) {
 }
 ?>
 
-<h2>Connexion</h2>
+<!DOCTYPE html>
+<html lang="fr">
 
-<form method="POST">
+<head>
 
-    <input type="text" name="username" placeholder="Nom utilisateur" required>
-    <br><br>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <input type="password" name="password" placeholder="Mot de passe" required>
-    <br><br>
+    <title>Connexion - VenteStat</title>
 
-    <button type="submit" name="login">Se connecter</button>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-</form>
+</head>
 
-<p style="color:red;">
-    <?= $error ?>
-</p>
+<body class="bg-light">
 
+<div class="container">
+
+    <div class="row justify-content-center align-items-center vh-100">
+
+        <div class="col-md-5">
+
+            <div class="card shadow-lg border-0">
+
+                <div class="card-header bg-primary text-white text-center">
+
+                    <h3>VenteStat</h3>
+
+                    <p class="mb-0">Connexion</p>
+
+                </div>
+
+                <div class="card-body p-4">
+
+                    <?php if(!empty($error)){ ?>
+
+                        <div class="alert alert-danger">
+
+                            <?= htmlspecialchars($error) ?>
+
+                        </div>
+
+                    <?php } ?>
+
+                    <form method="POST">
+
+                        <div class="mb-3">
+
+                            <label class="form-label">Nom d'utilisateur</label>
+
+                            <input
+                                type="text"
+                                name="username"
+                                class="form-control"
+                                required>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">Mot de passe</label>
+
+                            <input
+                                type="password"
+                                name="password"
+                                class="form-control"
+                                required>
+
+                        </div>
+
+                        <div class="d-grid">
+
+                            <button
+                                type="submit"
+                                name="login"
+                                class="btn btn-primary">
+
+                                Se connecter
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <div class="card-footer text-center text-muted">
+
+                    Mini plateforme de gestion et d'analyse des ventes
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
