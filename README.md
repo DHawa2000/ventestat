@@ -1,71 +1,116 @@
-# 📊 VenteStat - Mini plateforme de gestion des ventes
+# 📊 VenteStat - Mini plateforme de gestion et d'analyse des ventes
 
-## 📌 Description
-VenteStat est une application web développée en PHP et MySQL permettant de gérer les produits, les ventes et de visualiser des statistiques de vente.
+## 📌 Présentation du projet
 
----
+VenteStat est une application web de gestion et d’analyse des ventes développée en PHP (PDO) + MySQL + Bootstrap 5.
 
-## ⚙️ Technologies utilisées
-- PHP (PDO)
-- MySQL
-- Bootstrap 5
-- Chart.js
+Elle permet à une PME de gérer ses produits, enregistrer ses ventes et visualiser des indicateurs de performance (tableau de bord analytique).
 
 ---
 
 ## 🚀 Fonctionnalités
 
-### 🔐 Authentification
-- Connexion sécurisée
-- Sessions PHP
-- Déconnexion
+### 🔐 Authentification sécurisée
+- Connexion utilisateur
+- Mot de passe sécurisé avec password_hash
+- Protection des pages via sessions PHP
+
+---
 
 ### 📦 Gestion des produits (CRUD)
 - Ajouter un produit
 - Modifier un produit
 - Supprimer un produit
 - Lister les produits
+- Requêtes SQL préparées (PDO)
+
+---
 
 ### 🧾 Gestion des ventes
-- Création de vente
+- Enregistrement des ventes
+- Sélection de produits
 - Calcul automatique du total
-- Mise à jour du stock
-- Transaction SQL (BEGIN / COMMIT)
-
-### 📊 Tableau de bord
-- Chiffre d’affaires total
-- CA par catégorie
-- Top 5 produits
-- CA par mois avec graphique
+- Mise à jour automatique du stock
+- Utilisation de transactions SQL
 
 ---
 
-## 🔐 Sécurité
-- PDO avec requêtes préparées
-- Hachage des mots de passe
-- Protection des pages avec sessions
-- Échappement HTML (htmlspecialchars)
+### 🔎 Recherche et pagination
+- Recherche par mot-clé
+- Filtrage par catégorie
+- Pagination des résultats
 
 ---
 
-## 🗂️ Structure du projet
-Le projet est organisé en modules :
-- auth/
-- products/
-- sales/
-- dashboard/
-- includes/
-- config/
+### 📊 Tableau de bord analytique
+- Chiffre d’affaires total (CA)
+- Nombre de ventes
+- Nombre de produits
+- Top 5 produits vendus
+- CA par produit
+- CA mensuel
+- Graphiques avec Chart.js (bar + line)
 
 ---
 
-## 🧪 Installation
-1. Importer la base de données `database.sql`
-2. Configurer `config/db.php`
-3. Lancer Laragon / XAMPP
-4. Accéder à : http://localhost/ventestat
+## 🧱 Technologies utilisées
+
+- PHP (PDO)
+- MySQL
+- Bootstrap 5
+- JavaScript (Chart.js)
+- HTML5 / CSS3
+
+---
+
+## 🗄️ Base de données
+
+Le fichier de base de données est inclus :
+
+ventestat.sql
+
+Il contient :
+- Structure des tables
+- Relations (clés étrangères)
+- Données de test (contexte Mali : riz, sucre, huile, etc.)
+
+---
+
+## ⚙️ Installation
+
+1. Cloner le projet
+2. Le projet se trouve dans Laragon:
+   C:\laragon\www\ventestat
+3. Importer la base via phpMyAdmin :
+   http://localhost/phpmyadmin
+4. Lancer :
+   http://localhost/ventestat
+
+---
+
+## 🔑 Compte de test
+
+Username : admin  
+Password : admin123  
+
+---
+
+## 📁 Structure du projet
+
+ventestat/
+│
+├── auth/
+├── config/
+├── dashboard/
+├── products/
+├── sales/
+├── includes/
+├── ventestat.sql
+└── index.php
 
 ---
 
 ## 👨‍💻 Auteur
-Projet réalisé dans le cadre du module Full Stack & Back End.
+
+Projet réalisé dans le cadre d’un examen Full Stack (PHP/MySQL)
+

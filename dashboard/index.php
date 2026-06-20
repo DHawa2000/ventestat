@@ -8,122 +8,193 @@ if (!isset($_SESSION['user'])) {
 
 require_once "../config/db.php";
 
-// CA TOTAL
-$stmt = $pdo->query("
-SELECT SUM(total) AS ca_total FROM sales
-");
-$ca = $stmt->fetch();
-$caTotal = $ca['ca_total'] ?? 0;
+/* =========================
+   📊 KPI
+========================= */
+$ca_total = $pdo->query("SELECT SUM(total) FROM sales")->fetchColumn();
 
-// CA PAR CATEGORIE
-$stmt = $pdo->query("
-SELECT p.categorie,
-       SUM(s.total) AS chiffre_affaires
-FROM sales s
-JOIN products p ON s.product_id = p.id
-GROUP BY p.categorie
-");
-$caCategorie = $stmt->fetchAll();
+$nb_sales = $pdo->query("SELECT COUNT(*) FROM sales")->fetchColumn();
 
-// TOP PRODUITS
-$stmt = $pdo->query("
-SELECT p.libelle,
-       SUM(s.quantite) AS total_vendu
-FROM sales s
-JOIN products p ON s.product_id = p.id
-GROUP BY p.id
-ORDER BY total_vendu DESC
-LIMIT 5
-");
-$topProduits = $stmt->fetchAll();
+$nb_products = $pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
 
-// CA PAR MOIS
+/* =========================
+   🏆 TOP PRODUITS
+========================= */
+$top = $pdo->query("
+    SELECT p.libelle, SUM(s.quantite) AS qte
+    FROM sales s
+    JOIN products p ON s.product_id = p.id
+    GROUP BY p.libelle
+    ORDER BY qte DESC
+    LIMIT 5
+")->fetchAll();
+
+/* =========================
+   📊 CA PAR PRODUIT
+========================= */
+$labelsProd = [];
+$dataProd = [];
+
 $stmt = $pdo->query("
-SELECT DATE_FORMAT(sale_date,'%Y-%m') AS mois,
-       SUM(total) AS ca
-FROM sales
-GROUP BY mois
-ORDER BY mois
+    SELECT p.libelle, SUM(s.total) AS ca
+    FROM sales s
+    JOIN products p ON s.product_id = p.id
+    GROUP BY p.libelle
 ");
-$caMois = $stmt->fetchAll();
+
+while ($row = $stmt->fetch()) {
+    $labelsProd[] = $row['libelle'];
+    $dataProd[] = $row['ca'];
+}
+
+/* =========================
+   📈 CA PAR MOIS
+========================= */
+$labelsMonth = [];
+$dataMonth = [];
+
+$stmt = $pdo->query("
+    SELECT DATE_FORMAT(sale_date, '%Y-%m') AS mois, SUM(total) AS ca
+    FROM sales
+    GROUP BY mois
+    ORDER BY mois
+");
+
+while ($row = $stmt->fetch()) {
+    $labelsMonth[] = $row['mois'];
+    $dataMonth[] = $row['ca'];
+}
 ?>
 
 <?php include "../includes/header.php"; ?>
 
-<h1>Tableau de bord</h1>
+<div class="container mt-4">
 
-<!-- CA TOTAL -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card text-white bg-dark">
-            <div class="card-body">
-                <h5>CA Total</h5>
-                <h2><?= number_format($caTotal,2) ?> FCFA</h2>
+    <h2 class="mb-4">📊 Dashboard VenteStat</h2>
+
+    <!-- KPI -->
+    <div class="row">
+
+        <div class="col-md-4">
+            <div class="card text-white bg-primary shadow">
+                <div class="card-body">
+                    <h5>💰 Chiffre d'affaires</h5>
+                    <h3><?= number_format($ca_total, 0, ',', ' ') ?> FCFA</h3>
+                </div>
             </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="card text-white bg-success shadow">
+                <div class="card-body">
+                    <h5>🧾 Ventes</h5>
+                    <h3><?= $nb_sales ?></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-white bg-warning shadow">
+                <div class="card-body">
+                    <h5>📦 Produits</h5>
+                    <h3><?= $nb_products ?></h3>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <!-- GRAPHIQUES -->
+    <div class="row mt-4">
+
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    📈 CA par produit
+                </div>
+                <div class="card-body">
+                    <canvas id="chartProd"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    📊 CA par mois
+                </div>
+                <div class="card-body">
+                    <canvas id="chartMonth"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TOP PRODUITS -->
+    <div class="card mt-4 shadow">
+        <div class="card-header bg-primary text-white">
+            🏆 Top 5 produits vendus
+        </div>
+        <div class="card-body">
+
+            <table class="table table-hover">
+
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th>Quantité vendue</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php foreach ($top as $t): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($t['libelle']) ?></td>
+                            <td><?= $t['qte'] ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
 </div>
 
-<!-- CA CATEGORIE -->
-<h3>CA par catégorie</h3>
-
-<table class="table table-bordered">
-<tr>
-    <th>Catégorie</th>
-    <th>CA</th>
-</tr>
-
-<?php foreach($caCategorie as $c): ?>
-<tr>
-    <td><?= htmlspecialchars($c['categorie']) ?></td>
-    <td><?= number_format($c['chiffre_affaires'],2) ?></td>
-</tr>
-<?php endforeach; ?>
-</table>
-
-<!-- TOP PRODUITS -->
-<h3>Top 5 produits</h3>
-
-<table class="table table-striped">
-<tr>
-    <th>Produit</th>
-    <th>Quantité</th>
-</tr>
-
-<?php foreach($topProduits as $p): ?>
-<tr>
-    <td><?= htmlspecialchars($p['libelle']) ?></td>
-    <td><?= $p['total_vendu'] ?></td>
-</tr>
-<?php endforeach; ?>
-</table>
-
-<!-- GRAPH -->
-<h3>CA par mois</h3>
-<canvas id="monGraphique"></canvas>
-
+<!-- CHART JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-const labels = [
-<?php foreach($caMois as $m): ?>
-"<?= $m['mois'] ?>",
-<?php endforeach; ?>
-];
-
-const data = [
-<?php foreach($caMois as $m): ?>
-<?= $m['ca'] ?>,
-<?php endforeach; ?>
-];
-
-new Chart(document.getElementById('monGraphique'), {
+/* =========================
+   GRAPH 1 - PRODUITS
+========================= */
+new Chart(document.getElementById('chartProd'), {
     type: 'bar',
     data: {
-        labels: labels,
+        labels: <?= json_encode($labelsProd) ?>,
         datasets: [{
-            label: 'CA par mois',
-            data: data
+            label: 'CA (FCFA)',
+            data: <?= json_encode($dataProd) ?>,
+            backgroundColor: 'rgba(54, 162, 235, 0.6)'
+        }]
+    }
+});
+
+/* =========================
+   GRAPH 2 - MOIS
+========================= */
+new Chart(document.getElementById('chartMonth'), {
+    type: 'line',
+    data: {
+        labels: <?= json_encode($labelsMonth) ?>,
+        datasets: [{
+            label: 'CA mensuel (FCFA)',
+            data: <?= json_encode($dataMonth) ?>,
+            borderColor: 'green',
+            fill: false,
+            tension: 0.3
         }]
     }
 });

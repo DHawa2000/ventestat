@@ -13,7 +13,6 @@ $message = "";
 // PRODUITS
 $products = $pdo->query("SELECT * FROM products")->fetchAll();
 
-// TRAITEMENT VENTE
 if (isset($_POST['sell'])) {
 
     $product_id = $_POST['product_id'];
@@ -27,7 +26,6 @@ if (isset($_POST['sell'])) {
 
             $pdo->beginTransaction();
 
-            // produit
             $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ?");
             $stmt->execute([$product_id]);
             $product = $stmt->fetch();
@@ -42,14 +40,12 @@ if (isset($_POST['sell'])) {
 
             $total = $product['prix'] * $quantite;
 
-            // vente
             $stmt = $pdo->prepare("
                 INSERT INTO sales (product_id, quantite, total)
                 VALUES (?, ?, ?)
             ");
             $stmt->execute([$product_id, $quantite, $total]);
 
-            // stock
             $stmt = $pdo->prepare("
                 UPDATE products
                 SET stock = stock - ?
@@ -72,36 +68,76 @@ if (isset($_POST['sell'])) {
 
 <?php include "../includes/header.php"; ?>
 
-<h2>Nouvelle vente</h2>
+<div class="container mt-4">
 
-<?php if (isset($_GET['success'])): ?>
-    <div style="color:green;">Vente enregistrée avec succès</div>
-<?php endif; ?>
+    <div class="row justify-content-center">
 
-<?php if ($message): ?>
-    <div style="color:red;"><?= $message ?></div>
-<?php endif; ?>
+        <div class="col-md-7">
 
-<form method="POST">
+            <div class="card shadow border-0">
 
-    <label>Produit</label>
-    <select name="product_id" required>
-        <?php foreach ($products as $p): ?>
-            <option value="<?= $p['id'] ?>">
-                <?= htmlspecialchars($p['libelle']) ?> (Stock: <?= $p['stock'] ?>)
-            </option>
-        <?php endforeach; ?>
-    </select>
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">🧾 Nouvelle vente</h4>
+                </div>
 
-    <br><br>
+                <div class="card-body">
 
-    <label>Quantité</label>
-    <input type="number" name="quantite" min="1" required>
+                    <?php if (isset($_GET['success'])): ?>
+                        <div class="alert alert-success">
+                            Vente enregistrée avec succès
+                        </div>
+                    <?php endif; ?>
 
-    <br><br>
+                    <?php if ($message): ?>
+                        <div class="alert alert-danger">
+                            <?= htmlspecialchars($message) ?>
+                        </div>
+                    <?php endif; ?>
 
-    <button type="submit" name="sell">Valider vente</button>
+                    <form method="POST">
 
-</form>
+                        <div class="mb-3">
+                            <label class="form-label">Produit</label>
+
+                            <select name="product_id" class="form-select" required>
+                                <option value="">-- Choisir un produit --</option>
+
+                                <?php foreach ($products as $p): ?>
+                                    <option value="<?= $p['id'] ?>">
+                                        <?= htmlspecialchars($p['libelle']) ?> 
+                                        (Stock: <?= $p['stock'] ?>)
+                                    </option>
+                                <?php endforeach; ?>
+
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Quantité</label>
+
+                            <input type="number"
+                                   name="quantite"
+                                   class="form-control"
+                                   min="1"
+                                   required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" name="sell" class="btn btn-success">
+                                💰 Valider la vente
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 <?php include "../includes/footer.php"; ?>
